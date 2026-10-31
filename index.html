@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF6F3">
+<title>Dolce · Control de pedidos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,500&family=Figtree:wght@400;500;600;700&display=swap');
+
+  :root{
+    --fondo:#FFF6F3;
+    --nata:#FFFFFF;
+    --fresa:#CF2F4B;
+    --fresa-hondo:#A21F39;
+    --fresa-claro:#FBDDE2;
+    --mora:#4A2338;
+    --mora-suave:#7A5A68;
+    --linea:#F0DDDA;
+    --hoja:#2F6B46;
+    --hoja-bg:#E3F1E6;
+    --miel:#8F5F10;
+    --miel-bg:#FBEFD6;
+    --coral:#FF9AA9;
+    --display:'Bodoni Moda', Georgia, serif;
+    --texto:'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--fondo);}
+  .app{
+    font-family:var(--texto);
+    color:var(--mora);
+    min-height:100vh;
+    padding:22px 16px 110px;
+    max-width:1040px;
+    margin:0 auto;
+    font-size:15px;
+    line-height:1.45;
+  }
+  :focus-visible{outline:2px solid var(--fresa); outline-offset:2px;}
+  .num{font-variant-numeric:lining-nums tabular-nums;}
+
+  /* ===== Encabezado ===== */
+  .header{display:flex; align-items:center; gap:12px; margin-bottom:20px;}
+  .brand-mark{width:40px; height:40px; flex-shrink:0;}
+  h1{
+    font-family:var(--display); font-style:italic; font-weight:500;
+    font-size:40px; line-height:1; margin:0; letter-spacing:-.01em;
+  }
+  .subtitle{font-size:13.5px; color:var(--mora-suave); margin-top:4px;}
+
+  /* ===== Navegación: barra inferior en celular, píldora en pantalla grande ===== */
+  .nav-tabs{
+    position:fixed; left:0; right:0; bottom:0; z-index:20;
+    display:flex; gap:6px;
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);
+    border-top:1px solid var(--linea);
+  }
+  .nav-tab{
+    flex:1; background:transparent; color:var(--mora-suave);
+    padding:12px 6px; border-radius:14px; font-size:15px; font-weight:600;
+  }
+  .nav-tab.active{background:var(--fresa-claro); color:var(--fresa-hondo);}
+
+  .aviso{
+    background:var(--fresa-claro); color:var(--fresa-hondo);
+    border-radius:14px; padding:12px 16px; margin-bottom:18px; font-size:14px; font-weight:500;
+  }
+
+  /* ===== Paneles ===== */
+  .panel{background:var(--nata); border:1px solid var(--linea); border-radius:18px; padding:20px 18px; margin-bottom:18px;}
+  .panel h2{font-family:var(--display); font-weight:600; font-size:22px; line-height:1.15; margin:0 0 14px; letter-spacing:-.005em;}
+  .panel .ayuda{font-size:13.5px; color:var(--mora-suave); margin:-8px 0 12px;}
+
+  /* ===== Cifras de ventas ===== */
+  .stats{
+    display:grid; grid-template-columns:1fr 1fr; gap:1px;
+    background:var(--linea); border:1px solid var(--linea);
+    border-radius:18px; overflow:hidden; margin-bottom:18px;
+  }
+  .stat{background:var(--nata); padding:16px 18px;}
+  .stat.pendiente{grid-column:1/-1; background:var(--miel-bg);}
+  .stat .label{font-size:13.5px; color:var(--mora-suave); font-weight:500;}
+  .stat .value{font-family:var(--display); font-size:26px; font-weight:600; margin-top:2px;}
+  .stat.pendiente .value{color:var(--miel); font-size:38px; line-height:1.1;}
+  .stat.cobrado .value{color:var(--hoja);}
+
+  /* ===== Formularios ===== */
+  .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px;}
+  .campo{display:block; min-width:0;}
+  .campo > span{display:block; font-size:13px; font-weight:600; color:var(--mora-suave); margin-bottom:5px;}
+  .campo.ancho{grid-column:1/-1;}
+  input,select{
+    width:100%; padding:11px 12px; border:1.5px solid var(--linea); border-radius:12px;
+    font-family:var(--texto); font-size:16px; background:var(--fondo); color:var(--mora);
+  }
+  input:focus,select:focus{outline:none; border-color:var(--fresa);}
+  .field-actions{grid-column:1/-1; display:flex; gap:8px; margin-top:4px; flex-wrap:wrap; align-items:center;}
+
+  button{
+    font-family:var(--texto); font-weight:600; font-size:15px; border:none; border-radius:999px;
+    padding:11px 20px; cursor:pointer; transition:background .15s, border-color .15s, color .15s;
+  }
+  button:active{transform:translateY(1px);}
+  .btn-primary{background:var(--fresa); color:#fff;}
+  .btn-primary:hover{background:var(--fresa-hondo);}
+  .btn-primary:disabled{background:#d9c9cc; cursor:not-allowed;}
+  .btn-ghost{background:transparent; color:var(--mora); border:1.5px solid var(--linea);}
+  .btn-ghost:hover{border-color:var(--fresa); color:var(--fresa-hondo);}
+  .btn-add-lugar{background:transparent; color:var(--mora-suave); border:1.5px dashed var(--mora-suave);}
+  .btn-add-lugar:hover{color:var(--fresa-hondo); border-color:var(--fresa);}
+  .btn-sm{padding:8px 14px; font-size:13.5px;}
+
+  .filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; align-items:flex-end;}
+  .filters select{width:auto; min-width:150px;}
+  .filters .campo input{width:auto;}
+
+  /* ===== Quién me debe ===== */
+  .deuda{display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; padding:14px 0; border-bottom:1px solid var(--linea);}
+  .deuda:last-of-type{border-bottom:none;}
+  .deuda-quien{flex:1 1 170px; min-width:0;}
+  .deuda-quien strong{display:block; font-size:16px; margin-bottom:4px;}
+  .deuda-monto{font-family:var(--display); font-size:24px; font-weight:600; color:var(--miel);}
+  .deuda-acciones{display:flex; gap:8px; flex-wrap:wrap;}
+  .ver-detalle{background:none; border:none; padding:0; font-size:13.5px; font-weight:500; color:var(--mora-suave); text-decoration:underline; border-radius:4px;}
+  .deuda-detalle{background:var(--fondo); border-radius:12px; padding:8px 14px; margin:0 0 10px;}
+  .deuda-detalle div{display:flex; justify-content:space-between; gap:10px; font-size:13.5px; padding:4px 0; color:var(--mora-suave);}
+  .deuda-detalle b{color:var(--mora); font-weight:600;}
+
+  /* ===== Tablas ===== */
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  thead th{text-align:left; font-size:13px; font-weight:600; color:var(--mora-suave); padding:8px 8px; border-bottom:2px solid var(--linea);}
+  tbody td{padding:12px 8px; border-bottom:1px solid var(--linea); vertical-align:middle;}
+  tbody tr:hover{background:var(--fondo);}
+  .tag{display:inline-block; padding:3px 11px; border-radius:999px; font-size:12.5px; font-weight:600;}
+  .tag-pagado{background:var(--hoja-bg); color:var(--hoja);}
+  .tag-fiado{background:var(--miel-bg); color:var(--miel);}
+  .tag-lugar{background:var(--fresa-claro); color:var(--fresa-hondo);}
+  button.tag{padding:3px 11px; font-size:12.5px; border-radius:999px;}
+  .row-actions{display:flex; gap:4px;}
+  .icon-btn{background:none; border:none; font-size:16px; padding:6px 10px; border-radius:10px; color:var(--mora-suave);}
+  .icon-btn:hover{background:var(--fresa-claro); color:var(--fresa-hondo);}
+  .total-cell{font-weight:700;}
+  .empty{text-align:center; padding:34px 10px; color:var(--mora-suave);}
+  .loading{padding:60px 10px; text-align:center; color:var(--mora-suave);}
+  .status-line{font-size:13px; color:var(--mora-suave); margin-top:10px;}
+
+  /* ===== Aviso para instalar ===== */
+  .install-hint{
+    display:none; background:var(--hoja-bg); border-radius:14px;
+    padding:14px 16px; margin-bottom:18px; font-size:14px; color:#264F37; line-height:1.5;
+  }
+  .install-hint.show{display:block;}
+  .install-hint button{background:none; border:none; padding:6px 0 0; color:#264F37; text-decoration:underline; font-size:13.5px; font-weight:500;}
+
+  /* ===== Resumen: utilidad total ===== */
+  .hero-util{background:var(--mora); color:#FFF6F3; border-radius:22px; padding:24px 20px; margin-bottom:18px;}
+  .hero-top{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:20px;}
+  .hero-top h2{font-family:var(--display); font-weight:600; font-size:24px; margin:0; color:#FFF6F3;}
+  .hero-top select{
+    width:auto; padding:8px 14px; border-radius:999px; font-size:14.5px;
+    background:rgba(255,255,255,.1); color:#FFF6F3; border:1.5px solid rgba(255,246,243,.3);
+  }
+  .hero-top select option{color:#4A2338; background:#fff;}
+  .hero-pair{display:grid; grid-template-columns:1fr; gap:0;}
+  .hero-item .label{font-size:14.5px; opacity:.85;}
+  .hero-item + .hero-item{margin-top:18px; padding-top:18px; border-top:1px solid rgba(255,246,243,.2);}
+  .hero-num{font-family:var(--display); font-size:clamp(36px,9vw,56px); font-weight:500; line-height:1.05; margin:4px 0 6px;}
+  .hero-num.neg{color:var(--coral);}
+  .hero-item .nota{font-size:13px; opacity:.75; line-height:1.4;}
+  .hero-resumen{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:14px 18px;
+    margin-top:22px; padding-top:18px; border-top:1px solid rgba(255,246,243,.2);
+  }
+  .hero-resumen .label{font-size:13px; opacity:.75;}
+  .hero-resumen .v{font-weight:600; font-size:17px; margin-top:2px;}
+
+  /* ===== Resumen: mes a mes ===== */
+  .mes-row{padding:14px 0; border-bottom:1px solid var(--linea);}
+  .mes-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
+  .mes-nombre{font-weight:600; font-size:16px; text-transform:capitalize;}
+  .mes-util{font-family:var(--display); font-size:21px; font-weight:600; color:var(--hoja);}
+  .mes-util.neg{color:var(--fresa-hondo);}
+  .mes-bar{height:6px; background:var(--linea); border-radius:99px; margin:9px 0; overflow:hidden;}
+  .mes-bar i{display:block; height:100%; background:var(--hoja); border-radius:99px;}
+  .mes-bar.neg i{background:var(--fresa);}
+  .mes-sub{display:flex; flex-wrap:wrap; gap:2px 16px; font-size:13.5px; color:var(--mora-suave);}
+  .mes-sub b{color:var(--mora); font-weight:600;}
+  .mes-total{display:flex; justify-content:space-between; align-items:baseline; padding-top:16px; font-weight:700;}
+  .mes-total .mes-util{font-size:24px;}
+
+  /* ===== Resumen: detalle de un mes ===== */
+  .util-cards{display:grid; grid-template-columns:1fr; gap:10px; margin:14px 0 8px;}
+  .util-card{background:var(--fondo); border-radius:14px; padding:14px 16px;}
+  .util-card .label{font-size:13.5px; color:var(--mora-suave); font-weight:500;}
+  .util-card .value{font-family:var(--display); font-size:26px; font-weight:600; margin-top:2px;}
+  .util-card.pos .value{color:var(--hoja);}
+  .util-card.neg .value{color:var(--fresa-hondo);}
+  .linea-dato{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--linea);}
+  .linea-dato span:last-child{font-weight:600;}
+  .sub-titulo{margin:20px 0 2px; font-weight:700; font-size:15px;}
+
+  /* ===== Pantallas grandes ===== */
+  @media (min-width: 681px){
+    .app{padding:36px 24px 60px;}
+    h1{font-size:48px;}
+    .brand-mark{width:46px; height:46px;}
+    .nav-tabs{
+      position:static; display:inline-flex; padding:4px; margin-bottom:24px;
+      background:var(--nata); border:1px solid var(--linea); border-radius:999px;
+    }
+    .nav-tab{flex:none; padding:10px 28px; border-radius:999px;}
+    .nav-tab.active{background:var(--mora); color:#FFF6F3;}
+    .panel{padding:24px;}
+    .stats{grid-template-columns:1.5fr 1fr 1fr 1fr;}
+    .stat.pendiente{grid-column:auto;}
+    .form-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr));}
+    .campo.ancho{grid-column:auto;}
+    .campo.ancho.nota{grid-column:1/-1;}
+    .hero-util{padding:30px 32px;}
+    .hero-pair{grid-template-columns:1fr 1fr;}
+    .hero-item + .hero-item{margin-top:0; padding-top:0; border-top:none; padding-left:32px; border-left:1px solid rgba(255,246,243,.2);}
+    .hero-resumen{grid-template-columns:repeat(4,1fr);}
+    .util-cards{grid-template-columns:1fr 1fr;}
+  }
+
+  /* ===== Tablas como tarjetas en celular ===== */
+  @media (max-width: 680px){
+    .filters{flex-direction:column; align-items:stretch;}
+    .filters select,.filters .campo input{width:100%;}
+    table{display:block;}
+    thead{display:none;}
+    tbody,tr{display:block; width:100%;}
+    tbody tr{border:1px solid var(--linea); border-radius:16px; margin-bottom:12px; padding:10px 14px; background:var(--nata);}
+    tbody tr:hover{background:var(--nata);}
+    tbody td{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      border-bottom:1px solid var(--linea); padding:9px 0; text-align:right;
+    }
+    tbody td:last-child{border-bottom:none;}
+    tbody td::before{content:attr(data-label); font-weight:600; font-size:13px; color:var(--mora-suave); text-align:left;}
+    tbody td.total-cell{font-size:17px;}
+    .row-actions{justify-content:flex-end;}
+    .icon-btn{font-size:20px; padding:6px 12px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading" id="loading">Cargando…</div>
+</div>
+
+<script>
+(function(){
+
+const PRODUCTOS = ["Fresas con crema", "Napoleón", "Torta","Fresas"];
+const CATEGORIAS = ["Ingredientes", "Empaques y decoración", "Transporte / domicilios", "Publicidad", "Otros"];
+const PROVEEDORES_SEED = ["Makro", "D1", "Éxito", "Distrifresas", "Dispropan", "Mundo repostero", "Euro", "Salsamentaria Villa estadio", "Salsamentaria manantial", "Proveedor fresas y frutas"];
+
+// Fecha local (no UTC): evita que después de las 7 pm se guarde el día siguiente
+function pad(n){ return String(n).padStart(2,'0'); }
+function todayStr(){ const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function mesActual(){ return todayStr().slice(0,7); }
+
+let state = {
+  vista: 'ventas',
+  pedidos: [],
+  lugares: ["Conjunto Apto"],
+  compras: [],
+  proveedores: PROVEEDORES_SEED.slice(),
+  filtroLugar: "todos",
+  filtroEstado: "todos",
+  filtroFechaDesde: "",
+  filtroFechaHasta: "",
+  ordenFecha: "desc",
+  editId: null,
+  expandedDeuda: null,
+  cargando: true,
+  error: null,
+  guardando: false,
+  editCompraId: null,
+  guardandoCompra: false,
+  compraFiltroMes: mesActual(),
+  compraFiltroCategoria: "todas",
+  resumenMes: mesActual(),
+  resumenAnio: "todos"
+};
+
+function uid(){ return 'p_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
+function cid(){ return 'c_' + Date.now() + '_' + Math.floor(Math.random()*10000); }
+function money(n){
+  n = Number(n)||0;
+  const s = '$' + Math.abs(n).toLocaleString('es-CO', {maximumFractionDigits:0});
+  return n < 0 ? '-' + s : s;
+}
+const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function mesLegible(m){
+  if(!m) return 'todos los meses';
+  const p = m.split('-');
+  return (MESES_LARGO[Number(p[1])-1] || '') + ' ' + p[0];
+}
+
+const MARCA = `<svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+  <path d="M24 43C12.5 37 7 28.5 8.6 20.2 9.6 15 14.6 13 24 13s14.4 2 15.4 7.2C41 28.5 35.5 37 24 43z" fill="#CF2F4B"/>
+  <path d="M24 13c-3.4-4.6-8-5.6-11.6-4.6 2.2 3.8 6.4 5.4 11.6 4.6zM24 13c3.4-4.6 8-5.6 11.6-4.6-2.2 3.8-6.4 5.4-11.6 4.6z" fill="#2F6B46"/>
+  <path d="M24 13V7" stroke="#2F6B46" stroke-width="2.4" stroke-linecap="round"/>
+  <g fill="#FBDDE2"><circle cx="17" cy="23" r="1.3"/><circle cx="24" cy="21" r="1.3"/><circle cx="31" cy="23" r="1.3"/><circle cx="20" cy="29.5" r="1.3"/><circle cx="28" cy="29.5" r="1.3"/><circle cx="24" cy="35" r="1.3"/></g>
+</svg>`;
+
+/* ==================== API (mismo servidor) ==================== */
+
+async function apiGet(){
+  const res = await fetch('/api/data');
+  if(!res.ok) throw new Error('Error al leer datos (' + res.status + ')');
+  return res.json();
+}
+
+async function apiPost(action, payload){
+  const res = await fetch('/api/action', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, payload })
+  });
+  if(!res.ok) throw new Error('Error al guardar (' + res.status + ')');
+  return res.json();
+}
+
+function refreshProveedores(){
+  const set = {};
+  PROVEEDORES_SEED.forEach(p => set[p] = 1);
+  (state.compras || []).forEach(c => { if(c.proveedor) set[String(c.proveedor).trim()] = 1; });
+  state.proveedores = Object.keys(set);
+}
+
+async function loadData(){
+  state.cargando = true;
+  render();
+  try{
+    const data = await apiGet();
+    state.pedidos = data.pedidos || [];
+    state.lugares = (data.lugares && data.lugares.length) ? data.lugares : state.lugares;
+    state.compras = data.compras || [];
+    refreshProveedores();
+    state.error = null;
+  }catch(e){
+    state.error = 'No se pudo cargar la información. Revisa tu conexión y recarga la página.';
+  }
+  state.cargando = false;
+  render();
+}
+
+async function addLugar(){
+  const nombre = prompt('Nombre del lugar (empresa o conjunto):');
+  if(nombre && nombre.trim()){
+    const limpio = nombre.trim();
+    if(!state.lugares.includes(limpio)){
+      state.lugares.push(limpio);
+      render();
+      try{ await apiPost('addLugar', {nombre: limpio}); }
+      catch(e){ state.error = 'No se pudo guardar el lugar. Intenta de nuevo.'; render(); }
+    }
+  }
+}
+
+/* ==================== VENTAS ==================== */
+
+async function handleFormSubmit(e){
+  e.preventDefault();
+  const f = e.target;
+  const cantidad = Number(f.cantidad.value) || 1;
+  const precio = Number(f.precio.value) || 0;
+  const data = {
+    id: state.editId || uid(),
+    fecha: f.fecha.value || todayStr(),
+    cliente: f.cliente.value.trim(),
+    lugar: f.lugar.value,
+    producto: f.producto.value,
+    sabor: f.sabor.value.trim(),
+    cantidad,
+    precio,
+    total: cantidad * precio,
+    estado: f.estado.value
+  };
+  if(!data.cliente){ alert('Escribe el nombre del cliente'); return; }
+
+  state.guardando = true; render();
+  try{
+    if(state.editId){
+      const idx = state.pedidos.findIndex(p => p.id === state.editId);
+      if(idx > -1) state.pedidos[idx] = data;
+      await apiPost('update', data);
+    } else {
+      state.pedidos.unshift(data);
+      await apiPost('add', data);
+    }
+    state.editId = null;
+    state.error = null;
+  }catch(err){
+    state.error = 'No se pudo guardar el pedido. Intenta de nuevo.';
+  }
+  state.guardando = false;
+  render();
+}
+
+async function deletePedido(id){
+  if(!confirm('¿Eliminar este pedido?')) return;
+  const prev = state.pedidos;
+  state.pedidos = state.pedidos.filter(p => p.id !== id);
+  render();
+  try{ await apiPost('delete', {id}); }
+  catch(e){ state.pedidos = prev; state.error = 'No se pudo eliminar el pedido. Intenta de nuevo.'; render(); }
+}
+
+async function togglePago(id){
+  const p = state.pedidos.find(p => p.id === id);
+  if(!p) return;
+  const anterior = p.estado;
+  p.estado = p.estado === 'pagado' ? 'fiado' : 'pagado';
+  render();
+  try{ await apiPost('update', p); }
+  catch(e){ p.estado = anterior; state.error = 'No se pudo cambiar el estado de pago. Intenta de nuevo.'; render(); }
+}
+
+function editPedido(id){ state.editId = id; render(); window.scrollTo({top:0}); }
+function cancelEdit(){ state.editId = null; render(); }
+
+function getFiltered(){
+  let lista = state.pedidos.filter(p=>{
+    if(state.filtroLugar !== 'todos' && p.lugar !== state.filtroLugar) return false;
+    if(state.filtroEstado !== 'todos' && p.estado !== state.filtroEstado) return false;
+    if(state.filtroFechaDesde && p.fecha < state.filtroFechaDesde) return false;
+    if(state.filtroFechaHasta && p.fecha > state.filtroFechaHasta) return false;
+    return true;
+  });
+  lista.sort((a,b) => {
+    if(a.fecha === b.fecha) return 0;
+    const cmp = a.fecha < b.fecha ? -1 : 1;
+    return state.ordenFecha === 'asc' ? cmp : -cmp;
+  });
+  return lista;
+}
+
+function computeSummary(){
+  let total = 0, pendiente = 0, pagado = 0;
+  state.pedidos.forEach(p=>{
+    total += Number(p.total)||0;
+    if(p.estado === 'fiado') pendiente += Number(p.total)||0;
+    else pagado += Number(p.total)||0;
+  });
+  return {total, pendiente, pagado, count: state.pedidos.length};
+}
+
+function computeDeudas(){
+  const grupos = {};
+  state.pedidos.forEach(p=>{
+    if(p.estado !== 'fiado') return;
+    const key = (p.cliente||'').trim().toLowerCase() + '||' + (p.lugar||'').trim().toLowerCase();
+    if(!grupos[key]){
+      grupos[key] = { key, cliente: p.cliente, lugar: p.lugar, total: 0, pedidos: [] };
+    }
+    grupos[key].total += Number(p.total)||0;
+    grupos[key].pedidos.push(p);
+  });
+  return Object.values(grupos).sort((a,b) => b.total - a.total);
+}
+
+async function copiarMensaje(key, btnEl){
+  const deudas = computeDeudas();
+  const grupo = deudas.find(g => g.key === key);
+  if(!grupo) return;
+  const lineas = grupo.pedidos.map(p =>
+    `• ${p.fecha} — ${p.producto}${p.sabor ? ' (' + p.sabor + ')' : ''} x${p.cantidad}: ${money(p.total)}`
+  ).join('\n');
+  const mensaje = `Hola ${grupo.cliente}! 🍓\nTe cuento que tienes pendiente en Dolce:\n\n${lineas}\n\nTotal: ${money(grupo.total)}\n\n¡Gracias! 💕\n\nPara realizar el pago tienes dos opciones: \nLlave: 3017043537\nNequi: 3017043537`;
+
+  const original = btnEl.textContent;
+  try{
+    await navigator.clipboard.writeText(mensaje);
+    btnEl.textContent = '¡Copiado! ✓';
+  }catch(e){
+    prompt('Copia este mensaje manualmente:', mensaje);
+    btnEl.textContent = original;
+    return;
+  }
+  setTimeout(() => { btnEl.textContent = original; }, 1800);
+}
+
+async function marcarGrupoPagado(key){
+  const deudas = computeDeudas();
+  const grupo = deudas.find(g => g.key === key);
+  if(!grupo) return;
+  if(!confirm(`¿Marcar como pagado todo lo que debe ${grupo.cliente} (${grupo.lugar})? Total: ${money(grupo.total)}`)) return;
+
+  state.guardando = true; render();
+  try{
+    for(const p of grupo.pedidos){
+      p.estado = 'pagado';
+      await apiPost('update', p);
+    }
+    state.error = null;
+  }catch(e){
+    state.error = 'Algunos pagos no se pudieron actualizar. Revisa tu conexión e inténtalo de nuevo.';
+  }
+  state.guardando = false;
+  render();
+}
+
+/* ==================== COMPRAS ==================== */
+
+function getComprasFiltradas(){
+  return state.compras.filter(c => {
+    if(state.compraFiltroMes && String(c.fecha||'').slice(0,7) !== state.compraFiltroMes) return false;
+    if(state.compraFiltroCategoria !== 'todas' && c.categoria !== state.compraFiltroCategoria) return false;
+    return true;
+  }).sort((a,b) => (String(a.fecha) < String(b.fecha) ? 1 : -1));
+}
+
+async function handleCompraSubmit(e){
+  e.preventDefault();
+  const f = e.target;
+  const monto = Number(f.monto.value) || 0;
+  const data = {
+    id: state.editCompraId || cid(),
+    fecha: f.fecha.value || todayStr(),
+    categoria: f.categoria.value,
+    proveedor: f.proveedor.value.trim(),
+    insumo: f.insumo.value.trim(),
+    cantidad: f.cantidad.value.trim(),
+    monto,
+    nota: f.nota.value.trim()
+  };
+  if(monto <= 0){ alert('Escribe el monto pagado'); return; }
+
+  state.guardandoCompra = true; render();
+  try{
+    if(state.editCompraId){
+      const idx = state.compras.findIndex(c => c.id === state.editCompraId);
+      if(idx > -1) state.compras[idx] = data;
+      await apiPost('updateCompra', data);
+    } else {
+      state.compras.unshift(data);
+      await apiPost('addCompra', data);
+    }
+    refreshProveedores();
+    state.editCompraId = null;
+    state.error = null;
+  }catch(err){
+    state.error = 'No se pudo guardar la compra. Intenta de nuevo.';
+  }
+  state.guardandoCompra = false;
+  render();
+}
+
+async function deleteCompra(id){
+  if(!confirm('¿Eliminar esta compra?')) return;
+  const prev = state.compras;
+  state.compras = state.compras.filter(c => c.id !== id);
+  render();
+  try{ await apiPost('deleteCompra', {id}); }
+  catch(e){ state.compras = prev; state.error = 'No se pudo eliminar la compra. Intenta de nuevo.'; render(); }
+}
+
+function editCompra(id){ state.editCompraId = id; render(); window.scrollTo({top:0}); }
+
+/* ==================== RESUMEN ==================== */
+
+// Un mes puntual (para el detalle)
+function computeResumen(mes){
+  const ventasMes = state.pedidos.filter(p => String(p.fecha||'').slice(0,7) === mes);
+  let facturado = 0, cobrado = 0, vasos = 0;
+  ventasMes.forEach(p => {
+    const t = Number(p.total)||0;
+    facturado += t;
+    if(p.estado === 'pagado') cobrado += t;
+    vasos += Number(p.cantidad)||0;
+  });
+
+  const comprasMes = state.compras.filter(c => String(c.fecha||'').slice(0,7) === mes);
+  let comprasTotal = 0;
+  const porCategoria = {};
+  CATEGORIAS.forEach(c => porCategoria[c] = 0);
+  comprasMes.forEach(c => {
+    const m = Number(c.monto)||0;
+    comprasTotal += m;
+    porCategoria[c.categoria] = (porCategoria[c.categoria]||0) + m;
+  });
+
+  return {
+    facturado, cobrado, comprasTotal, porCategoria, vasos,
+    utilidadFacturada: facturado - comprasTotal,
+    utilidadCaja: cobrado - comprasTotal,
+    ticket: ventasMes.length ? facturado / ventasMes.length : 0,
+    nVentas: ventasMes.length,
+    nCompras: comprasMes.length
+  };
+}
+
+// Todos los meses con movimiento, y su suma
+function computeTotales(anio){
+  const meses = {};
+  const get = k => meses[k] || (meses[k] = { mes:k, facturado:0, cobrado:0, compras:0 });
+  const clave = f => { const k = String(f||'').slice(0,7); return /^\d{4}-\d{2}$/.test(k) ? k : null; };
+
+  state.pedidos.forEach(p => {
+    const k = clave(p.fecha); if(!k) return;
+    const t = Number(p.total)||0, m = get(k);
+    m.facturado += t;
+    if(p.estado === 'pagado') m.cobrado += t;
+  });
+  state.compras.forEach(c => {
+    const k = clave(c.fecha); if(!k) return;
+    get(k).compras += Number(c.monto)||0;
+  });
+
+  const todos = Object.values(meses).sort((a,b) => a.mes < b.mes ? -1 : 1);
+  const anios = Array.from(new Set(todos.map(m => m.mes.slice(0,4)))).sort().reverse();
+  const lista = todos
+    .filter(m => anio === 'todos' || m.mes.slice(0,4) === anio)
+    .map(m => ({ ...m, utilFact: m.facturado - m.compras, utilCaja: m.cobrado - m.compras }));
+
+  const tot = lista.reduce((a,m) => ({
+    facturado: a.facturado + m.facturado,
+    cobrado: a.cobrado + m.cobrado,
+    compras: a.compras + m.compras
+  }), { facturado:0, cobrado:0, compras:0 });
+  tot.utilFact = tot.facturado - tot.compras;
+  tot.utilCaja = tot.cobrado - tot.compras;
+
+  return { lista, tot, anios };
+}
+
+/* ==================== HELPERS DE RENDER ==================== */
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderNav(){
+  const tab = (id, label) =>
+    `<button type="button" class="nav-tab ${state.vista===id ? 'active':''}" data-vista="${id}" ${state.vista===id ? 'aria-current="page"':''}>${label}</button>`;
+  return `<nav class="nav-tabs" aria-label="Secciones">${tab('ventas','Ventas')}${tab('compras','Compras')}${tab('resumen','Resumen')}</nav>`;
+}
+
+function renderDeudas(){
+  const deudas = computeDeudas();
+  if(deudas.length === 0) return '';
+  const totalGeneral = deudas.reduce((sum, g) => sum + g.total, 0);
+  return `
+    <div class="panel">
+      <h2>Quién me debe</h2>
+      ${deudas.map(g => `
+        <div class="deuda">
+          <div class="deuda-quien">
+            <strong>${esc(g.cliente)}</strong>
+            <span class="tag tag-lugar">${esc(g.lugar)}</span>
+            <button type="button" class="ver-detalle" data-toggle-detalle="${esc(g.key)}">${g.pedidos.length} ${g.pedidos.length === 1 ? 'pedido' : 'pedidos'}</button>
+          </div>
+          <div class="deuda-monto num">${money(g.total)}</div>
+          <div class="deuda-acciones">
+            <button type="button" class="btn-ghost btn-sm" data-copiar-mensaje="${esc(g.key)}">Copiar mensaje</button>
+            <button type="button" class="btn-ghost btn-sm" data-marcar-pagado="${esc(g.key)}">Marcar pagado</button>
+          </div>
+        </div>
+        ${state.expandedDeuda === g.key ? `
+        <div class="deuda-detalle">
+          ${g.pedidos.map(p => `
+            <div>
+              <span>${esc(p.fecha)}, ${esc(p.producto)}${p.sabor ? ' (' + esc(p.sabor) + ')' : ''} × ${p.cantidad}</span>
+              <b class="num">${money(p.total)}</b>
+            </div>
+          `).join('')}
+        </div>` : ''}
+      `).join('')}
+      <div class="status-line">Total pendiente entre todos: <strong class="num" style="color:var(--miel);">${money(totalGeneral)}</strong></div>
+    </div>
+  `;
+}
+
+function renderVentas(){
+  const s = computeSummary();
+  const editing = state.editId ? state.pedidos.find(p=>p.id===state.editId) : null;
+  const filtered = getFiltered();
+
+  return `
+    <div class="install-hint" id="installHint">
+      <strong>Ábrela como una app:</strong> agrega esta página a tu pantalla de inicio.<br>
+      iPhone: Compartir → "Agregar a pantalla de inicio". Android/Chrome: menú ⋮ → "Agregar a pantalla de inicio".<br>
+      <button type="button" id="dismissInstallHint">Ya la agregué, no mostrar más</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat pendiente"><div class="label">Por cobrar (fiado)</div><div class="value num">${money(s.pendiente)}</div></div>
+      <div class="stat"><div class="label">Vendido total</div><div class="value num">${money(s.total)}</div></div>
+      <div class="stat cobrado"><div class="label">Ya cobrado</div><div class="value num">${money(s.pagado)}</div></div>
+      <div class="stat"><div class="label">Pedidos</div><div class="value num">${s.count}</div></div>
+    </div>
+
+    ${renderDeudas()}
+
+    <div class="panel">
+      <h2>${editing ? 'Editar pedido' : 'Nuevo pedido'}</h2>
+      <form id="pedidoForm">
+        <div class="form-grid">
+          <label class="campo"><span>Fecha</span><input type="date" name="fecha" value="${editing ? esc(editing.fecha) : todayStr()}"></label>
+          <label class="campo ancho"><span>Cliente</span><input type="text" name="cliente" placeholder="Nombre" value="${editing ? esc(editing.cliente) : ''}"></label>
+          <label class="campo"><span>Lugar</span>
+            <select name="lugar">${state.lugares.map(l => `<option value="${esc(l)}" ${editing && editing.lugar===l ? 'selected':''}>${esc(l)}</option>`).join('')}</select>
+          </label>
+          <label class="campo"><span>Producto</span>
+            <select name="producto">${PRODUCTOS.map(pr => `<option value="${esc(pr)}" ${editing && editing.producto===pr ? 'selected':''}>${esc(pr)}</option>`).join('')}</select>
+          </label>
+          <label class="campo"><span>Sabor</span><input type="text" name="sabor" placeholder="Ej: mora, arequipe" value="${editing ? esc(editing.sabor) : ''}"></label>
+          <label class="campo"><span>Cantidad</span><input type="number" name="cantidad" min="1" inputmode="numeric" value="${editing ? esc(editing.cantidad) : 1}"></label>
+          <label class="campo"><span>Precio por unidad</span><input type="number" name="precio" min="0" step="1" inputmode="numeric" value="${editing ? esc(editing.precio) : ''}"></label>
+          <label class="campo"><span>Estado de pago</span>
+            <select name="estado">
+              <option value="pagado" ${editing && editing.estado==='pagado' ? 'selected':''}>Pagado</option>
+              <option value="fiado" ${editing && editing.estado==='fiado' ? 'selected':''}>Fiado (quincena)</option>
+            </select>
+          </label>
+          <div class="field-actions">
+            <button type="submit" class="btn-primary" ${state.guardando ? 'disabled':''}>${state.guardando ? 'Guardando…' : (editing ? 'Guardar cambios' : 'Agregar pedido')}</button>
+            ${editing ? '<button type="button" class="btn-ghost" id="cancelEditBtn">Cancelar</button>' : ''}
+            <button type="button" class="btn-add-lugar" id="addLugarBtn">+ Agregar lugar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Pedidos</h2>
+      <div class="filters">
+        <select id="filtroLugar" aria-label="Filtrar por lugar">
+          <option value="todos">Todos los lugares</option>
+          ${state.lugares.map(l => `<option value="${esc(l)}" ${state.filtroLugar===l?'selected':''}>${esc(l)}</option>`).join('')}
+        </select>
+        <select id="filtroEstado" aria-label="Filtrar por estado de pago">
+          <option value="todos" ${state.filtroEstado==='todos'?'selected':''}>Todos los estados</option>
+          <option value="pagado" ${state.filtroEstado==='pagado'?'selected':''}>Pagados</option>
+          <option value="fiado" ${state.filtroEstado==='fiado'?'selected':''}>Fiados</option>
+        </select>
+        <label class="campo"><span>Desde</span><input type="date" id="filtroFechaDesde" value="${esc(state.filtroFechaDesde)}"></label>
+        <label class="campo"><span>Hasta</span><input type="date" id="filtroFechaHasta" value="${esc(state.filtroFechaHasta)}"></label>
+        ${(state.filtroFechaDesde || state.filtroFechaHasta) ? `<button type="button" class="btn-ghost btn-sm" id="limpiarFechasBtn">Quitar fechas</button>` : ''}
+        <button type="button" class="btn-ghost btn-sm" id="ordenFechaBtn">
+          ${state.ordenFecha === 'desc' ? 'Recientes primero' : 'Antiguos primero'}
+        </button>
+      </div>
+      ${filtered.length === 0 ? `<div class="empty">No hay pedidos con este filtro. Agrega uno arriba.</div>` : `
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th style="cursor:pointer;" id="thFecha" title="Clic para cambiar el orden">Fecha ${state.ordenFecha === 'desc' ? '↓' : '↑'}</th><th>Cliente</th><th>Lugar</th><th>Producto</th><th>Sabor</th><th>Cant.</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          ${filtered.map(p => `
+            <tr>
+              <td data-label="Fecha">${esc(p.fecha)}</td>
+              <td data-label="Cliente"><strong>${esc(p.cliente)}</strong></td>
+              <td data-label="Lugar"><span class="tag tag-lugar">${esc(p.lugar)}</span></td>
+              <td data-label="Producto">${esc(p.producto)}</td>
+              <td data-label="Sabor">${esc(p.sabor) || '—'}</td>
+              <td data-label="Cantidad" class="num">${esc(p.cantidad)}</td>
+              <td data-label="Total" class="total-cell num">${money(p.total)}</td>
+              <td data-label="Estado"><button type="button" class="tag ${p.estado==='pagado'?'tag-pagado':'tag-fiado'}" data-toggle="${esc(p.id)}" title="Toca para cambiar el estado">${p.estado==='pagado' ? 'Pagado' : 'Fiado'}</button></td>
+              <td data-label="">
+                <div class="row-actions">
+                  <button type="button" class="icon-btn" data-edit="${esc(p.id)}" title="Editar" aria-label="Editar pedido">✎</button>
+                  <button type="button" class="icon-btn" data-del="${esc(p.id)}" title="Eliminar" aria-label="Eliminar pedido">✕</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </div>
+      <div class="status-line">Tus datos se guardan en la nube automáticamente.</div>
+      `}
+    </div>
+  `;
+}
+
+function bindVentas(){
+  document.getElementById('pedidoForm').addEventListener('submit', handleFormSubmit);
+  document.getElementById('addLugarBtn').addEventListener('click', addLugar);
+  const cancelBtn = document.getElementById('cancelEditBtn');
+  if(cancelBtn) cancelBtn.addEventListener('click', cancelEdit);
+  document.getElementById('filtroLugar').addEventListener('change', e => { state.filtroLugar = e.target.value; render(); });
+  document.getElementById('filtroEstado').addEventListener('change', e => { state.filtroEstado = e.target.value; render(); });
+  document.getElementById('filtroFechaDesde').addEventListener('change', e => { state.filtroFechaDesde = e.target.value; render(); });
+  document.getElementById('filtroFechaHasta').addEventListener('change', e => { state.filtroFechaHasta = e.target.value; render(); });
+  const limpiarBtn = document.getElementById('limpiarFechasBtn');
+  if(limpiarBtn) limpiarBtn.addEventListener('click', () => { state.filtroFechaDesde = ''; state.filtroFechaHasta = ''; render(); });
+  document.getElementById('ordenFechaBtn').addEventListener('click', () => { state.ordenFecha = state.ordenFecha === 'desc' ? 'asc' : 'desc'; render(); });
+  const thFecha = document.getElementById('thFecha');
+  if(thFecha) thFecha.addEventListener('click', () => { state.ordenFecha = state.ordenFecha === 'desc' ? 'asc' : 'desc'; render(); });
+  document.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => togglePago(el.getAttribute('data-toggle'))));
+  document.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => editPedido(el.getAttribute('data-edit'))));
+  document.querySelectorAll('[data-del]').forEach(el => el.addEventListener('click', () => deletePedido(el.getAttribute('data-del'))));
+  document.querySelectorAll('[data-toggle-detalle]').forEach(el => el.addEventListener('click', () => {
+    const key = el.getAttribute('data-toggle-detalle');
+    state.expandedDeuda = state.expandedDeuda === key ? null : key;
+    render();
+  }));
+  document.querySelectorAll('[data-marcar-pagado]').forEach(el => el.addEventListener('click', () => marcarGrupoPagado(el.getAttribute('data-marcar-pagado'))));
+  document.querySelectorAll('[data-copiar-mensaje]').forEach(el => el.addEventListener('click', () => copiarMensaje(el.getAttribute('data-copiar-mensaje'), el)));
+
+  const hint = document.getElementById('installHint');
+  if(hint){
+    let yaDescartada = false;
+    try{ yaDescartada = localStorage.getItem('dolce_hint_dismissed') === '1'; }catch(e){}
+    const yaInstalada = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if(!yaInstalada && !yaDescartada) hint.classList.add('show');
+    const dismissBtn = document.getElementById('dismissInstallHint');
+    if(dismissBtn) dismissBtn.addEventListener('click', () => {
+      try{ localStorage.setItem('dolce_hint_dismissed', '1'); }catch(e){}
+      hint.classList.remove('show');
+    });
+  }
+}
+
+function renderCompras(){
+  const editing = state.editCompraId ? state.compras.find(c => c.id === state.editCompraId) : null;
+  const lista = getComprasFiltradas();
+  const totalFiltro = lista.reduce((sum, c) => sum + (Number(c.monto)||0), 0);
+
+  return `
+    <div class="stats">
+      <div class="stat pendiente"><div class="label">Compras de ${esc(mesLegible(state.compraFiltroMes))}</div><div class="value num">${money(totalFiltro)}</div></div>
+      <div class="stat"><div class="label">Registros</div><div class="value num">${lista.length}</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>${editing ? 'Editar compra' : 'Registrar compra'}</h2>
+      <form id="compraForm">
+        <div class="form-grid">
+          <label class="campo"><span>Fecha</span><input type="date" name="fecha" value="${editing ? esc(editing.fecha) : todayStr()}"></label>
+          <label class="campo"><span>Categoría</span>
+            <select name="categoria">${CATEGORIAS.map(c => `<option value="${esc(c)}" ${editing && editing.categoria===c ? 'selected':''}>${esc(c)}</option>`).join('')}</select>
+          </label>
+          <label class="campo"><span>Proveedor o lugar</span>
+            <input type="text" name="proveedor" list="proveedoresList" placeholder="Ej: Makro" value="${editing ? esc(editing.proveedor) : ''}">
+            <datalist id="proveedoresList">${state.proveedores.map(p => `<option value="${esc(p)}"></option>`).join('')}</datalist>
+          </label>
+          <label class="campo"><span>Insumo</span><input type="text" name="insumo" placeholder="Ej: Crema de leche" value="${editing ? esc(editing.insumo) : ''}"></label>
+          <label class="campo"><span>Cantidad</span><input type="text" name="cantidad" placeholder="Ej: 1000 g, 2 paquetes" value="${editing ? esc(editing.cantidad) : ''}"></label>
+          <label class="campo"><span>Monto pagado</span><input type="number" name="monto" min="0" step="1" inputmode="numeric" value="${editing ? esc(editing.monto) : ''}"></label>
+          <label class="campo ancho nota"><span>Nota (opcional)</span><input type="text" name="nota" placeholder="Cualquier detalle" value="${editing ? esc(editing.nota) : ''}"></label>
+          <div class="field-actions">
+            <button type="submit" class="btn-primary" ${state.guardandoCompra ? 'disabled':''}>${state.guardandoCompra ? 'Guardando…' : (editing ? 'Guardar cambios' : 'Agregar compra')}</button>
+            ${editing ? '<button type="button" class="btn-ghost" id="cancelEditCompraBtn">Cancelar</button>' : ''}
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Compras registradas</h2>
+      <div class="filters">
+        <label class="campo"><span>Mes</span><input type="month" id="compraFiltroMes" value="${esc(state.compraFiltroMes)}"></label>
+        <select id="compraFiltroCategoria" aria-label="Filtrar por categoría">
+          <option value="todas">Todas las categorías</option>
+          ${CATEGORIAS.map(c => `<option value="${esc(c)}" ${state.compraFiltroCategoria===c?'selected':''}>${esc(c)}</option>`).join('')}
+        </select>
+        ${state.compraFiltroMes ? `<button type="button" class="btn-ghost btn-sm" id="compraVerTodoBtn">Ver todos los meses</button>` : ''}
+      </div>
+      ${lista.length === 0 ? `<div class="empty">No hay compras con este filtro. Registra una arriba.</div>` : `
+      <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Fecha</th><th>Categoría</th><th>Proveedor</th><th>Insumo</th><th>Cantidad</th><th>Monto</th><th></th></tr></thead>
+        <tbody>
+          ${lista.map(c => `
+            <tr>
+              <td data-label="Fecha">${esc(c.fecha)}</td>
+              <td data-label="Categoría">${esc(c.categoria)}</td>
+              <td data-label="Proveedor">${esc(c.proveedor) || '—'}</td>
+              <td data-label="Insumo">${esc(c.insumo) || '—'}</td>
+              <td data-label="Cantidad">${esc(c.cantidad) || '—'}</td>
+              <td data-label="Monto" class="total-cell num">${money(c.monto)}</td>
+              <td data-label="">
+                <div class="row-actions">
+                  <button type="button" class="icon-btn" data-edit-compra="${esc(c.id)}" title="Editar" aria-label="Editar compra">✎</button>
+                  <button type="button" class="icon-btn" data-del-compra="${esc(c.id)}" title="Eliminar" aria-label="Eliminar compra">✕</button>
+                </div>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+      </div>
+      <div class="status-line">Las compras se guardan en la nube automáticamente.</div>
+      `}
+    </div>
+  `;
+}
+
+function bindCompras(){
+  document.getElementById('compraForm').addEventListener('submit', handleCompraSubmit);
+  const cancel = document.getElementById('cancelEditCompraBtn');
+  if(cancel) cancel.addEventListener('click', () => { state.editCompraId = null; render(); });
+  const fm = document.getElementById('compraFiltroMes');
+  if(fm) fm.addEventListener('change', e => { state.compraFiltroMes = e.target.value; render(); });
+  const fc = document.getElementById('compraFiltroCategoria');
+  if(fc) fc.addEventListener('change', e => { state.compraFiltroCategoria = e.target.value; render(); });
+  const vt = document.getElementById('compraVerTodoBtn');
+  if(vt) vt.addEventListener('click', () => { state.compraFiltroMes = ''; render(); });
+  document.querySelectorAll('[data-edit-compra]').forEach(el => el.addEventListener('click', () => editCompra(el.getAttribute('data-edit-compra'))));
+  document.querySelectorAll('[data-del-compra]').forEach(el => el.addEventListener('click', () => deleteCompra(el.getAttribute('data-del-compra'))));
+}
+
+function mesCorto(m){
+  const abr = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const p = m.split('-');
+  return (abr[Number(p[1])-1] || '') + ' ' + p[0];
+}
+
+function renderResumen(){
+  if(state.resumenAnio !== 'todos' && !computeTotales('todos').anios.includes(state.resumenAnio)) state.resumenAnio = 'todos';
+  const t = computeTotales(state.resumenAnio);
+  const r = computeResumen(state.resumenMes);
+
+  let porCobrar = 0;
+  state.pedidos.forEach(p => { if(p.estado === 'fiado') porCobrar += Number(p.total)||0; });
+
+  const maxAbs = Math.max(1, ...t.lista.map(m => Math.abs(m.utilFact)));
+  const clsFact = t.tot.utilFact < 0 ? 'neg' : '';
+  const clsCaja = t.tot.utilCaja < 0 ? 'neg' : '';
+  const nMeses = t.lista.length;
+
+  const hero = `
+    <section class="hero-util">
+      <div class="hero-top">
+        <h2>Utilidad total</h2>
+        <select id="resumenAnio" aria-label="Periodo">
+          <option value="todos" ${state.resumenAnio==='todos'?'selected':''}>Todos los meses</option>
+          ${t.anios.map(a => `<option value="${esc(a)}" ${state.resumenAnio===a?'selected':''}>Solo ${esc(a)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="hero-pair">
+        <div class="hero-item">
+          <div class="label">Utilidad facturada</div>
+          <div class="hero-num num ${clsFact}">${money(t.tot.utilFact)}</div>
+          <div class="nota">Todo lo vendido, incluido el fiado, menos las compras.</div>
+        </div>
+        <div class="hero-item">
+          <div class="label">Utilidad de caja</div>
+          <div class="hero-num num ${clsCaja}">${money(t.tot.utilCaja)}</div>
+          <div class="nota">Solo lo que ya cobraste, menos las compras.</div>
+        </div>
+      </div>
+      <div class="hero-resumen">
+        <div><div class="label">Vendido</div><div class="v num">${money(t.tot.facturado)}</div></div>
+        <div><div class="label">Cobrado</div><div class="v num">${money(t.tot.cobrado)}</div></div>
+        <div><div class="label">Compras</div><div class="v num">${money(t.tot.compras)}</div></div>
+        <div><div class="label">Por cobrar hoy</div><div class="v num">${money(porCobrar)}</div></div>
+      </div>
+    </section>`;
+
+  const meses = nMeses === 0
+    ? `<div class="empty">Aún no hay ventas ni compras. Registra la primera para ver tu utilidad.</div>`
+    : t.lista.slice().reverse().map(m => `
+        <div class="mes-row">
+          <div class="mes-head">
+            <span class="mes-nombre">${esc(mesCorto(m.mes))}</span>
+            <span class="mes-util num ${m.utilFact < 0 ? 'neg' : ''}">${money(m.utilFact)}</span>
+          </div>
+          <div class="mes-bar ${m.utilFact < 0 ? 'neg' : ''}"><i style="width:${Math.max(2, Math.round(Math.abs(m.utilFact) / maxAbs * 100))}%"></i></div>
+          <div class="mes-sub">
+            <span>Vendido <b class="num">${money(m.facturado)}</b></span>
+            <span>Compras <b class="num">${money(m.compras)}</b></span>
+            <span>Utilidad de caja <b class="num">${money(m.utilCaja)}</b></span>
+          </div>
+        </div>`).join('') + `
+        <div class="mes-total">
+          <span>Total ${nMeses} ${nMeses === 1 ? 'mes' : 'meses'}</span>
+          <span class="mes-util num ${t.tot.utilFact < 0 ? 'neg' : ''}">${money(t.tot.utilFact)}</span>
+        </div>`;
+
+  const clsFactMes = r.utilidadFacturada >= 0 ? 'pos' : 'neg';
+  const clsCajaMes = r.utilidadCaja >= 0 ? 'pos' : 'neg';
+
+  return `
+    ${hero}
+
+    <div class="panel">
+      <h2>Mes a mes</h2>
+      <div class="ayuda">La barra muestra la utilidad facturada de cada mes.</div>
+      ${meses}
+    </div>
+
+    <div class="panel">
+      <h2>Detalle de un mes</h2>
+      <label class="campo"><span>Mes</span><input type="month" id="resumenMes" value="${esc(state.resumenMes)}" style="width:auto;"></label>
+
+      <div class="util-cards">
+        <div class="util-card ${clsFactMes}">
+          <div class="label">Utilidad facturada</div>
+          <div class="value num">${money(r.utilidadFacturada)}</div>
+        </div>
+        <div class="util-card ${clsCajaMes}">
+          <div class="label">Utilidad de caja</div>
+          <div class="value num">${money(r.utilidadCaja)}</div>
+        </div>
+      </div>
+
+      <div class="linea-dato"><span>Ventas facturadas (${r.nVentas})</span><span class="num">${money(r.facturado)}</span></div>
+      <div class="linea-dato"><span>Ventas cobradas</span><span class="num" style="color:var(--hoja);">${money(r.cobrado)}</span></div>
+      <div class="linea-dato"><span>Compras del mes (${r.nCompras})</span><span class="num">${money(r.comprasTotal)}</span></div>
+
+      <div class="sub-titulo">Compras por categoría</div>
+      ${CATEGORIAS.map(c => `<div class="linea-dato"><span>${esc(c)}</span><span class="num">${money(r.porCategoria[c]||0)}</span></div>`).join('')}
+
+      <div class="sub-titulo">Otros datos del mes</div>
+      <div class="linea-dato"><span>Unidades vendidas</span><span class="num">${r.vasos}</span></div>
+      <div class="linea-dato"><span>Ticket promedio por pedido</span><span class="num">${money(r.ticket)}</span></div>
+    </div>
+  `;
+}
+
+function bindResumen(){
+  const m = document.getElementById('resumenMes');
+  if(m) m.addEventListener('change', e => { state.resumenMes = e.target.value || mesActual(); render(); });
+  const a = document.getElementById('resumenAnio');
+  if(a) a.addEventListener('change', e => { state.resumenAnio = e.target.value; render(); });
+}
+
+/* ==================== RENDER PRINCIPAL ==================== */
+
+function render(){
+  const app = document.getElementById('app');
+
+  if(state.cargando){
+    app.innerHTML = `<div class="loading">Cargando…</div>`;
+    return;
+  }
+
+  const header = `
+    <header class="header">
+      ${MARCA}
+      <div>
+        <h1>Dolce</h1>
+        <div class="subtitle">Pedidos, compras y utilidad</div>
+      </div>
+    </header>`;
+
+  const errorBanner = state.error
+    ? `<div class="aviso" role="alert">${esc(state.error)}</div>`
+    : '';
+
+  let contenido;
+  if(state.vista === 'compras') contenido = renderCompras();
+  else if(state.vista === 'resumen') contenido = renderResumen();
+  else contenido = renderVentas();
+
+  app.innerHTML = header + renderNav() + errorBanner + contenido;
+
+  app.querySelectorAll('[data-vista]').forEach(el =>
+    el.addEventListener('click', () => { state.vista = el.getAttribute('data-vista'); render(); window.scrollTo({top:0}); }));
+
+  if(state.vista === 'compras') bindCompras();
+  else if(state.vista === 'resumen') bindResumen();
+  else bindVentas();
+}
+
+loadData();
+})();
+</script>
+</body>
+</html>
+
